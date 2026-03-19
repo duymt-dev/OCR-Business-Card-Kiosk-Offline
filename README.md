@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Registration Kiosk (Offline-First)
 
 **Python 3.11.9 · Flask · HTML/JS/CSS · Nimiq QR Scanner · OCR (RapidOCR) · YOLOv8**
@@ -90,11 +89,5 @@ After building, ensure the `models/` and  `.env` are copied to the `dist/saomais
 - **UI Flow**: Detailed analysis and optimization plans are available in the `mds/` directory.
 
 ---
-
-## 📄 License
-
-Copyright © 2026. Built with focus on professional event registration stability.
-=======
 # OCR-Business-Card-Kiosk-Offline
 Developed an offline-first Kiosk application on Raspberry Pi 5 for events. It uses two cameras to scan documents (QR codes, ID cards, business cards), detect faces, give voice feedback, and print registration QR codes.
->>>>>>> 8ca41c31de1adc04ea67e3295ef1d989a3bc7e50
