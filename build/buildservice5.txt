@@ -1,0 +1,134 @@
+Ok, ngon rồi, mình chỉnh lại toàn bộ cho đúng với path:
+
+📁 Source: /home/pi/ai/code3124/webview_kiosk_nimiq/apppy5.py
+👤 User: pi
+🌐 URL: http://127.0.0.1:5000
+
+Mình sẽ viết lại 3 bước, anh chỉ việc copy–paste là xong.
+
+1. Tạo run.sh đúng thư mục & file apppy5.py
+
+Vào đúng thư mục code:
+
+cd /home/pi/ai/code3124/webview_kiosk_nimiq
+nano run.sh
+
+
+Nội dung file run.sh:
+
+#!/bin/bash
+# ---- ĐƯỜNG DẪN PROJECT ----
+cd /home/pi/ai/code3124/webview_kiosk_nimiq
+
+# Nếu anh dùng virtualenv thì bỏ comment 2 dòng sau và sửa tên venv cho đúng
+# source venv/bin/activate
+
+# Biến môi trường cho Flask
+export HOST=0.0.0.0
+export PORT=5000
+
+# Nếu có model GGUF / ONNX thì anh set thêm ở đây (tùy anh):
+# export LLM_GGUF=./models/qwen2.5-3b-instruct-q4_0.gguf
+# export ONNX_MODEL=./model.onnx
+
+# Chạy app
+python3 apppy5.py
+
+
+Lưu lại (Ctrl+O, Enter, Ctrl+X), sau đó cho quyền chạy:
+
+chmod +x /home/pi/ai/code3124/webview_kiosk_nimiq/run.sh
+
+2. Tạo service systemd cho Flask (kiosk-ocr.service)
+
+Tạo file service:
+
+sudo nano /etc/systemd/system/kiosk-ocr.service
+
+
+Nội dung:
+
+[Unit]
+Description=Kiosk OCR Flask App (apppy5.py)
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/ai/code3124/webview_kiosk_nimiq
+ExecStart=/home/pi/ai/code3124/webview_kiosk_nimiq/run.sh
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+
+
+Lưu lại, rồi chạy:
+
+sudo systemctl daemon-reload
+sudo systemctl enable kiosk-ocr.service
+sudo systemctl start kiosk-ocr.service
+
+
+Kiểm tra:
+
+sudo systemctl status kiosk-ocr.service
+
+
+Nếu thấy:
+
+Active: active (running) → OK
+
+Nếu lỗi, xem log nhanh:
+
+journalctl -u kiosk-ocr.service -f
+
+3. Tự động mở Firefox vào 127.0.0.1:5000 khi vào desktop
+
+Tạo thư mục autostart (nếu chưa có):
+
+mkdir -p /home/pi/.config/autostart
+nano /home/pi/.config/autostart/kiosk-firefox.desktop
+
+
+Nội dung:
+
+[Desktop Entry]
+Type=Application
+Name=Kiosk Firefox
+Comment=Mở Firefox vào kiosk OCR
+Exec=sh -c "sleep 7 && firefox --kiosk http://127.0.0.1:5000"
+X-GNOME-Autostart-enabled=true
+
+
+sleep 7: chờ thêm vài giây cho Flask + model warmup xong.
+
+--kiosk: full-screen (nếu không thích, bỏ --kiosk).
+
+Lưu file là xong.
+
+4. Thử như lúc boot thật
+
+Anh chỉ cần reboot:
+
+sudo reboot
+
+
+Sau khi vào giao diện desktop:
+
+Service kiosk-ocr.service tự chạy ngầm.
+
+Sau khoảng 7s, Firefox tự bật, full màn, mở http://127.0.0.1:5000.
+
+sudo systemctl stop kiosk-ocr.service
+sudo systemctl disable kiosk-ocr.service
+sudo rm /etc/systemd/system/kiosk-ocr.service
+sudo systemctl daemon-reload
+sudo systemctl reset-failed
+Xong, kiểm tra lại:
+
+bash
+Sao chép mã
+systemctl status kiosk-ocr.service

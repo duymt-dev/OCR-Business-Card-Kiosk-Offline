@@ -1,0 +1,47 @@
+# Business Card Orientation Detection — Approach B (Text Direction Classifier)
+ 
+## Problem
+ 
+Business cards placed upside down (180°) result in empty or incorrect OCR results. The current [deskew_card()](file:///d:/bamboo_nissin/card/utils.py#114-145) only corrects slight tilts (<20°) and cannot detect or fix 180° rotations.
+ 
+## Solution
+ 
+Utilize the **text direction classifier** (`cls` model) available in PaddleOCR via the `cls_model_path` + `use_angle_cls` parameters in RapidOCR. The `cls` model is a small CNN (~586KB) that classifies each text region as 0° or 180° and automatically rotates it before recognition.
+ 
+> [!IMPORTANT]
+> The `cls` step runs **on each text region** between detection and recognition: `det → cls → rec`. It does not rotate the entire image.
+ 
+## Proposed Changes
+ 
+### Model Download
+ 
+#### [NEW] [ch_ppocr_mobile_v2.0_cls_infer.onnx](file:///d:/bamboo_nissin/models/ch_ppocr_mobile_v2.0_cls_infer.onnx)
+ 
+Download from HuggingFace: `SWHL/RapidOCR` → `PP-OCRv1/ch_ppocr_mobile_v2.0_cls_infer.onnx` (~586KB). Place it in `models/`.
+ 
+---
+ 
+### OCR Pipeline
+ 
+#### [MODIFY] [ocr.py](file:///d:/bamboo_nissin/card/ocr.py)
+ 
+**In [get_reader()](file:///d:/bamboo_nissin/card/ocr.py#406-461) (lines ~406-460):**
+ 
+1. Add logic to find the `cls` model file (check existence).
+2. Pass `cls_model_path` and `use_angle_cls=True` to `RapidOCR()` when the `cls` model is present.
+3. Add environment variable `OCR_USE_ANGLE_CLS` (default `"1"`) to enable/disable.
+4. Log whether the `cls` model has been loaded.
+ 
+No changes needed to [RapidReaderWrapper](file:///d:/bamboo_nissin/card/ocr.py#188-403) or [readtext()](file:///d:/bamboo_nissin/card/ocr.py#348-403).
+ 
+## Test Plan
+ 
+### Automated Tests
+```bash
+python -m pytest tests/test_card_image_unittest.py -v
+```
+ 
+### Manual Verification
+1. Prepare test images: regular card + card rotated 180°.
+2. Run tests on both orientations and compare results.
+3. On Pi 5: deploy and test with physical cards.

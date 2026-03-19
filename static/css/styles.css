@@ -1,0 +1,810 @@
+/* ========== THEME & RESET ========== */
+:root {
+  --bg: #0b1024;
+  --panel: #0f1735;
+  --text: #e7ebff;
+  --muted: #9fb2ff;
+  --accent: #ff8a3d;
+  --line: #263063;
+  --primary: #4f8cff;
+  --gap: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(1200px 700px at 20% -10%, #13235a 0%, #0b1024 55%, #070b1c 100%);
+  color: var(--text);
+  font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  font-size: 20px
+}
+
+h2 {
+  font-size: 18px;
+  margin: 6px 0 12px
+}
+
+/* ========== GRID LAYOUT: 2 HÀNG (H1: nội dung, H2: dãy nút) ========== */
+main.grid-12 {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: 1fr auto;
+  /* Hàng 1 co giãn, hàng 2 cao theo nội dung */
+  gap: var(--gap);
+  padding: var(--gap);
+}
+
+/* Span helpers */
+.col-7 {
+  grid-column: span 7;
+  min-width: 0;
+}
+
+.col-5 {
+  grid-column: span 5;
+  min-width: 0;
+}
+
+.col-12 {
+  grid-column: span 12;
+  min-width: 0;
+}
+
+/* ========== PANEL CHUNG ========== */
+.panel {
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ========== CAMERA CỘT TRÁI (7/12): 2 KHỐI CHIA ĐỀU ========== */
+.panel.cameras {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: var(--gap);
+  min-height: 0;
+}
+
+.camera-block {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.row-one {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.row-one h2 {
+  margin-right: 8px;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.row-one .label-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  width: auto;
+  flex: 0 0 auto;
+}
+
+#cam1-select,
+#cam2-select {
+  min-width: 200px;
+  max-width: 420px;
+  flex: 0 1 280px;
+}
+
+/* Hộp video */
+.video-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  display: grid;
+  place-items: center;
+}
+
+.video-wrap>video,
+.video-wrap>canvas,
+.video-wrap>.overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+video {
+  object-fit: contain;
+  background: #000;
+  width: 100%;
+  height: 100%;
+}
+
+.overlay {
+  pointer-events: none;
+}
+
+#scan-overlay {
+  outline: 2px dashed rgba(255, 255, 255, .6);
+}
+
+/* Badge & Nút nguồn */
+.badge-paused {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  background: rgba(220, 53, 69, 0.95);
+  border: 1px solid #ff4444;
+  color: #fff;
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.ocr-status {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--muted);
+  font-size: 11px;
+  z-index: 5;
+}
+
+.power-btn svg {
+  display: block;
+}
+
+.power-btn {
+  color: #e7ebff;
+}
+
+/* màu mặc định */
+.power-btn.on {
+  color: var(--primary);
+}
+
+/* khi bật */
+
+.power-btn {
+  z-index: 5;
+}
+
+.power-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, .45);
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+  backdrop-filter: blur(3px);
+}
+
+.power-btn:hover {
+  filter: brightness(1.15);
+}
+
+.power-btn.on {
+  box-shadow: 0 0 0 2px rgba(79, 140, 255, .35) inset, 0 0 12px rgba(79, 140, 255, .6);
+}
+
+/* POWER BUTTON TO HƠN */
+.power-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 48px;
+  /* từ 36px -> 48px */
+  height: 48px;
+  /* từ 36px -> 48px */
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, .45);
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  /* icon/text to hơn chút */
+  line-height: 1;
+  backdrop-filter: blur(3px);
+  z-index: 5;
+}
+
+/* Icon bên trong to hơn cho rõ */
+.power-btn svg {
+  display: block;
+  width: 26px;
+  /* thêm */
+  height: 26px;
+  /* thêm */
+}
+
+/* Khi bật vẫn giữ hiệu ứng sáng */
+.power-btn.on {
+  color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(79, 140, 255, .35) inset,
+    0 0 12px rgba(79, 140, 255, .6);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.hidden-controls {
+  display: none;
+}
+
+/* ========== CỘT PHẢI (5/12): 2 HÀNG – ẢNH & FORM ========== */
+.right-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Căn giữa theo chiều dọc */
+  align-items: center;
+  /* Căn giữa theo chiều ngang */
+  gap: var(--gap);
+  min-height: 0;
+  height: 100%;
+}
+
+/* Hàng 1: Ảnh mặt & QR - Phóng to & Căn giữa */
+.ketqua.two-up {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  align-items: center;
+}
+
+.ketqua>div {
+  width: 260px;
+  height: 450px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.ketqua img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+#qr-from-server {
+  background: #fff;
+}
+
+#face-preview {
+  background: #000;
+}
+
+/* Hàng 2: Stack form (CCCD + BCard) */
+.forms-stack {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 12px;
+  overflow: auto;
+}
+
+/* ========== FORM CHUẨN 12 CỘT ========== */
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+input {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #0e1a42;
+  color: var(--text);
+}
+
+.form.form-12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.form.form-12 .span-12 {
+  grid-column: span 12;
+}
+
+.form.form-12 .span-4 {
+  grid-column: span 4;
+}
+
+.form.form-12 .span-3 {
+  grid-column: span 3;
+}
+
+/* ========== NÚT HÀNH ĐỘNG HÀNG 2 (FULL WIDTH) ========== */
+.panel.actions {
+  padding: 10px;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  background: #162258;
+  color: var(--text);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  filter: brightness(1.1);
+}
+
+.btn.primary {
+  background: var(--primary);
+  border-color: #2b5ed4;
+  color: #fff;
+}
+
+.btn.accent {
+  background: var(--accent);
+  border-color: #c75f22;
+  color: #111;
+}
+
+.btn.danger {
+  background: #cc4b4b;
+  border-color: #9b3131;
+  color: #fff;
+}
+
+/* ========== TEXT UTILS ========== */
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.small {
+  font-size: 12px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.presence {
+  margin: 8px;
+}
+
+.log {
+  margin-top: 10px;
+  max-height: 160px;
+  overflow: auto;
+  border-top: 1px dashed var(--line);
+  padding-top: 8px;
+}
+
+/* ========== PRINT QR (trang riêng #print-area nếu cần) ========== */
+#print-area {
+  display: none;
+}
+
+@media print {
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  body>* {
+    display: none !important;
+  }
+
+  #print-area {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
+  }
+
+  #qr-print {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #qr-print img {
+    width: 45mm;
+    height: 45mm;
+    object-fit: contain;
+  }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width:1200px) {
+  .actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .form.form-12 .span-4 {
+    grid-column: span 6;
+  }
+
+  .form.form-12 .span-3 {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width:900px) {
+
+  .col-7,
+  .col-5 {
+    grid-column: span 12;
+  }
+
+  .panel.cameras {
+    grid-template-rows: auto auto;
+  }
+}
+
+@media (max-width:560px) {
+  .actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ketqua.two-up {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ketqua>div {
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+    aspect-ratio: 1/1;
+  }
+}
+
+.video-wrap.ar-169 {
+  aspect-ratio: 16/9;
+  height: auto;
+  max-height: 100%;
+}
+
+.btn[disabled],
+button[disabled] {
+  opacity: .55;
+  pointer-events: none;
+  /* phòng lib nào đó bắt sự kiện tay */
+  filter: grayscale(0.3);
+}
+
+/* chữ to và đậm hơn cho tất cả button trong actions-grid */
+.actions-grid .btn {
+  font-size: 18px;
+  /* to hơn */
+  font-weight: 700;
+  /* đậm hơn */
+  line-height: 1.2;
+  letter-spacing: .2px;
+  /* nhìn sắc nét hơn chút */
+}
+
+
+.floating-win-btn {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 99999;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  font-size: 18px;
+  line-height: 40px;
+  text-align: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .25);
+  transition: transform .15s ease, background .15s ease;
+}
+
+.floating-win-btn:hover {
+  transform: scale(1.06);
+  background: rgba(0, 0, 0, .7);
+}
+
+.floating-win-btn.is-max {
+  background: rgba(0, 128, 0, .55);
+}
+
+/* trạng thái đã maximize */
+
+/* ========== WELCOME EYES OVERLAY (ROBOT FACE) ========== */
+.welcome-eyes-overlay {
+  --welcome-avatar-w: min(100vw, 100vh);
+  --welcome-mouth-w: calc(var(--welcome-avatar-w) * .36);
+  --welcome-mouth-h: calc(var(--welcome-avatar-w) * .16);
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f4ff;
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, .35));
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .35s ease, visibility .35s ease;
+}
+
+.welcome-eyes-overlay.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.welcome-face {
+  width: var(--welcome-avatar-w);
+  height: calc(var(--welcome-avatar-w) * 0.52);
+  position: relative;
+}
+
+/* === Eyes === */
+.welcome-eye {
+  position: absolute;
+  top: 18%;
+  width: calc(var(--welcome-avatar-w) * 0.28);
+  height: calc(var(--welcome-avatar-w) * 0.22);
+  background: #fff;
+  border: 3px solid #0c1024;
+  border-radius: 50% / 60%;
+  overflow: hidden;
+  transition: transform .08s ease, filter .2s ease;
+}
+
+.welcome-eye.left {
+  transform: scaleX(-1);
+  left: 10%;
+}
+
+.welcome-eye.right {
+  transform: scaleX(-1);
+  right: 10%;
+}
+
+.welcome-pupil {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30%;
+  height: 60%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 45% 35%, #2b3ea6 10%, #0a1a6a 55%, #0b122e 70%);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+  will-change: transform;
+}
+
+.welcome-pupil::after {
+  content: "";
+  position: absolute;
+  left: 20%;
+  top: 18%;
+  width: 30%;
+  height: 22%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Blink */
+.welcome-eyes-overlay.blink .welcome-eye {
+  transform: scaleX(-1) scaleY(.15);
+}
+
+.welcome-eyes-overlay.listening .welcome-eye {
+  filter: drop-shadow(0 0 6px rgba(120, 180, 255, .8));
+}
+
+/* === Mouth (cup style) === */
+.welcome-mouth {
+  position: absolute;
+  left: 50%;
+  bottom: 9%;
+  transform: translateX(-50%);
+  width: var(--welcome-mouth-w);
+  height: var(--welcome-mouth-h);
+}
+
+.welcome-mouth .cup {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(120% 145% at 50% 0%, #8ff4ff 0%, #61e0f0 55%, #1aaac2 100%);
+  border: 3px solid #0c1024;
+  border-top: none;
+  border-radius: 0 0 999px 999px/0 0 100% 100%;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, .18);
+  transform-origin: 50% 60%;
+  transform: rotate(0) scaleY(.85);
+  transition: transform .14s ease;
+}
+
+.welcome-mouth .line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 66%;
+  height: 8px;
+  transform: translate(-50%, -50%) scaleX(.95);
+  background: #0d1228;
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity .15s ease, transform .15s ease;
+}
+
+/* Talking animations */
+.welcome-eyes-overlay.speaking.mood-happy .welcome-mouth .cup {
+  animation: welcome-talkSmile 160ms ease-in-out infinite alternate;
+}
+
+.welcome-eyes-overlay.speaking.mood-sad .welcome-mouth .cup {
+  animation: welcome-talkSad 160ms ease-in-out infinite alternate;
+}
+
+.welcome-eyes-overlay.speaking.mood-neutral .welcome-mouth .line {
+  animation: welcome-talkFlat 180ms ease-in-out infinite alternate;
+}
+
+@keyframes welcome-talkSmile {
+  0% {
+    transform: rotate(0) scaleY(.70);
+  }
+
+  100% {
+    transform: rotate(0) scaleY(1.05);
+  }
+}
+
+@keyframes welcome-talkSad {
+  0% {
+    transform: rotate(180deg) scaleY(.75);
+  }
+
+  100% {
+    transform: rotate(180deg) scaleY(.98);
+  }
+}
+
+@keyframes welcome-talkFlat {
+  0% {
+    transform: translate(-50%, -50%) scaleX(.65);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scaleX(1);
+  }
+}
+
+/* Mood states */
+.welcome-eyes-overlay.mood-happy .welcome-mouth .cup {
+  display: block;
+  transform: rotate(0) scaleY(.85);
+}
+
+.welcome-eyes-overlay.mood-happy .welcome-mouth .line {
+  opacity: 0;
+}
+
+.welcome-eyes-overlay.mood-sad .welcome-mouth .cup {
+  display: block;
+  transform: rotate(180deg) scaleY(.85);
+}
+
+.welcome-eyes-overlay.mood-sad .welcome-mouth .line {
+  opacity: 0;
+}
+
+.welcome-eyes-overlay.mood-neutral .welcome-mouth .cup {
+  display: none;
+}
+
+.welcome-eyes-overlay.mood-neutral .welcome-mouth .line {
+  opacity: 1;
+}
+
+/* === Cheeks === */
+.welcome-cheek {
+  position: absolute;
+  top: 58%;
+  width: calc(var(--welcome-avatar-w) * .14);
+  height: calc(var(--welcome-avatar-w) * .10);
+  border-radius: 50%;
+  filter: blur(1px);
+  background: radial-gradient(60% 60% at 50% 50%,
+      rgba(255, 180, 195, .85) 0%,
+      rgba(255, 140, 160, .55) 60%,
+      rgba(255, 120, 150, 0) 100%);
+  opacity: 0;
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.welcome-cheek.left {
+  left: 18%;
+}
+
+.welcome-cheek.right {
+  right: 18%;
+}
+
+.welcome-eyes-overlay.mood-happy .welcome-cheek,
+.welcome-eyes-overlay.speaking .welcome-cheek {
+  opacity: .9;
+}
+
+.welcome-eyes-overlay.mood-sad .welcome-cheek {
+  opacity: .45;
+}

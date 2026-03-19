@@ -1,0 +1,4 @@
+source .venv/bin/activate
+python3 apppy5.py
+
+-fullscreen   --kiosk

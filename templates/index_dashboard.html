@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>ダッシュボード</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/themify-icons@1.0.1/css/themify-icons.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+
+<body class="app">
+  <!-- @TOC -->
+  <!-- =================================================== -->
+  <!--
+      + @Page Loader
+      + @App Content
+          - #Left Sidebar
+              > $Sidebar Header
+              > $Sidebar Menu
+
+          - #Main
+              > $Topbar
+              > $App Screen Content
+    -->
+
+  <!-- @Page Loader -->
+  <!-- =================================================== -->
+  <div id='loader'>
+    <div class="spinner"></div>
+  </div>
+
+  <script src="/static/js/dashboard.js"></script>
+
+  <!-- @App Content -->
+  <!-- =================================================== -->
+  <div>
+    <!-- #Left Sidebar ==================== -->
+    <div class="sidebar">
+      <div class="sidebar-inner">
+        <!-- ### $Sidebar Header ### -->
+        <div class="sidebar-logo">
+          <div class="peers ai-c fxw-nw">
+            <div class="peer peer-greed">
+              <a class="sidebar-link td-n">
+                <div class="peers ai-c fxw-nw">
+                  <div class="peer">
+                    <div class="logo">
+                      <img src="assets/static/images/logo.svg" alt="">
+                    </div>
+                  </div>
+                  <div class="peer peer-greed">
+                    <h5 class="lh-1 mB-0 logo-text">受付登録</h5>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="peer">
+            </div>
+          </div>
+        </div>
+
+        <!-- ### $Sidebar Menu ### -->
+        <ul class="sidebar-menu scrollable pos-r">
+          <li class="nav-item">
+            <a class="sidebar-link" href="javascript:void(0);" data-screen-target="database">
+              <span class="icon-holder">
+                <i class="c-blue-500 ti-agenda"></i>
+              </span>
+              <span class="title">ダッシュボード</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- #Main ============================ -->
+    <div class="page-container">
+      <!-- ### $Topbar ### -->
+      <div class="header navbar">
+        <div class="header-container">
+          <ul class="nav-left">
+            <li>
+              <a id='sidebar-toggle' class="sidebar-toggle" href="javascript:void(0);">
+                <i class="ti-menu"></i>
+              </a>
+            </li>
+            <li class="search-input">
+              <input id="globalSearchInput" class="form-control" type="text" placeholder="名前または会社を検索">
+            </li>
+          </ul>
+          <ul class="nav-right">
+            <li class="notifications dropdown">
+              <span id="notifCounter" class="counter bgc-red">0</span>
+              <a href="javascript:void(0);" class="dropdown-toggle no-after" id="dropdownMenuButton1"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti-bell"></i>
+              </a>
+
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li class="pX-20 pY-15 bdB">
+                  <i class="ti-bell pR-10"></i>
+                  <span class="fsz-sm fw-600 c-grey-900">通知</span>
+                </li>
+                <li>
+                  <ul id="notificationList" class="ovY-a pos-r scrollable lis-n p-0 m-0 fsz-sm">
+                    <li id="notificationEmpty">
+                      <a href="javascript:void(0);" class='peers fxw-nw td-n p-20 bdB c-grey-800'>
+                        <div class="peer peer-greed">
+                          <span class="c-grey-600">新しい登録はありません。</span>
+                        </div>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+                <li id="notificationMeta" class="notification-meta" style="display:none;"></li>
+              </ul>
+            </li>
+            <li class="dropdown user-menu">
+              <a class="dropdown-toggle user-menu-toggle no-after peers fxw-nw ai-c lh-1" data-bs-toggle="dropdown">
+                <div class="peer mR-10">
+                </div>
+                <div class="peer">
+                  <span class="fsz-sm c-grey-900">{{ (current_user.display_name if current_user else '') or
+                    (current_user.username if current_user else 'User') }}</span>
+                </div>
+              </a>
+              <ul class="dropdown-menu fsz-sm">
+                <li>
+                  <a id="logoutBtn" href="javascript:void(0);" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700">
+                    <i class="ti-power-off mR-10"></i>
+                    <span>ログアウト</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ### $App Screen Content ### -->
+      <main class='main-content bgc-grey-100'>
+        <div id='mainContent'>
+          <section class="app-screen" data-screen="database">
+            <div class="row gap-20 masonry pos-r">
+              <div class="masonry-item col-12">
+                <div class="bd bgc-white">
+                  <div class="layers">
+                    <div class="layer w-100 pX-20 pY-15 bdB">
+                      <div class="result-toolbar">
+                        <h6 class="lh-1 mB-0"></h6>
+                        <div class="result-toolbar-actions">
+                          <button id="exportExcelBtn" class="btn-export" type="button">Excel出力</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="layer w-100">
+                      <div class="database-layout pX-20 pY-15">
+                        <div class="database-layout-full">
+                          <div class="dashboard-stats-row">
+                            <div class="dashboard-stat-card">
+                              <p class="dashboard-stat-label">総来場者</p>
+                              <p class="dashboard-stat-value" id="statTotal">0</p>
+                            </div>
+                            <div class="dashboard-stat-card">
+                              <p class="dashboard-stat-label">本日登録</p>
+                              <p class="dashboard-stat-value" id="statToday">0</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="database-layout-row">
+                          <div class="database-layout-main">
+                            <div class="table-responsive">
+                              <div class="table-scroll-area">
+                                <table id="databaseTable" class="table table-hover mB-0">
+                                  <colgroup>
+                                    <col style="width:140px;">
+                                    <col style="width:140px;">
+                                    <col style="width:140px;">
+                                    <col style="width:140px;">
+                                    <col style="width:140px;">
+                                    <col style="width:140px;">
+                                  </colgroup>
+                                  <thead>
+                                    <tr>
+                                      <th>登録ID</th>
+                                      <th>氏名</th>
+                                      <th>会社</th>
+                                      <th>メール</th>
+                                      <th>電話</th>
+                                      <th>操作</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody id="databaseTableBody">
+                                    <tr id="databaseEmptyRow" class="empty-search-row">
+                                      <td colspan="6">該当するデータがありません。</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div class="result-toolbar mT-15">
+                                <div class="result-toolbar-actions">
+                                  <button id="databasePrevBtn" class="btn-export" type="button">前へ</button>
+                                  <span id="databasePageInfo" class="mX-10">Page 1 / 1</span>
+                                  <button id="databaseNextBtn" class="btn-export" type="button">次へ</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <aside class="guest-detail-panel">
+                            <div class="guest-detail-head">
+                              <span class="guest-radio" id="detailDot"></span>
+                              <strong id="detailName">ゲストを選択</strong>
+                            </div>
+
+                            <div class="guest-detail-card">
+                              <h6>情報</h6>
+                              <p id="detailInfo">一覧の行をクリックして詳細を表示します。</p>
+                            </div>
+
+                            <div class="guest-detail-card">
+                              <h6>最近の活動</h6>
+                              <p id="detailActivity">-</p>
+                            </div>
+                          </aside>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <div id="editModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+      <div class="modal-header">
+        <h6 id="editModalTitle">編集</h6>
+        <button id="editCloseBtn" type="button" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-field">
+          <label for="editFullName">氏名</label>
+          <input id="editFullName" type="text" />
+        </div>
+        <div class="modal-field">
+          <label for="editCompany">会社</label>
+          <input id="editCompany" type="text" />
+        </div>
+        <div class="modal-field">
+          <label for="editEmail">メール</label>
+          <input id="editEmail" type="email" />
+        </div>
+        <div class="modal-field">
+          <label for="editPhone">電話</label>
+          <input id="editPhone" type="text" />
+        </div>
+        <div class="modal-field">
+          <label for="editTitle">役職</label>
+          <input id="editTitle" type="text" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="editConfirmBtn" type="button" class="modal-btn modal-btn-primary">確認</button>
+        <button id="editCancelBtn" type="button" class="modal-btn modal-btn-secondary">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card modal-card-sm" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+      <div class="modal-header">
+        <h6 id="confirmModalTitle">確認</h6>
+        <button type="button" class="modal-close" data-modal-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmModalMessage">よろしいですか？</p>
+      </div>
+      <div class="modal-actions">
+        <button id="confirmYesBtn" type="button" class="modal-btn modal-btn-primary">確認</button>
+        <button id="confirmNoBtn" type="button" class="modal-btn modal-btn-secondary">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="exportModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card modal-card-sm" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+      <div class="modal-header">
+        <h6 id="exportModalTitle">エクスポート</h6>
+        <button id="exportCloseBtn" type="button" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-field">
+          <label for="exportDateFrom">開始日</label>
+          <input id="exportDateFrom" type="date" />
+        </div>
+        <div class="modal-field">
+          <label for="exportDateTo">終了日</label>
+          <input id="exportDateTo" type="date" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="exportConfirmBtn" type="button" class="modal-btn modal-btn-primary">確認</button>
+        <button id="exportCancelBtn" type="button" class="modal-btn modal-btn-secondary">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

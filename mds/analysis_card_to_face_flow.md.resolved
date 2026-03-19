@@ -1,0 +1,153 @@
+# Flow Analysis: Card Capture → Face Capture → Idle (Eyes) Screen Return
+ 
+## 1. What happens when Card capture is successful?
+ 
+**Trigger**: In `startAutoCardFromCam1()`, when `js.card_detected === true`:
+ 
+```
+1. autoCyclePhase = "CARD"
+2. suppressGreetingDuringCompletion = true
+3. Lock Cam1 (lockScanCam1) → cardAutoDone = true
+4. Capture OCR frame (1280px) → send to async background OCR
+5. If NO face photo yet → call startFaceGuidanceAndArmCapture()
+   If face photo exists → call tryFinalizeSessionAfterFaceAndOcr()
+```
+ 
+## 2. [startFaceGuidanceAndArmCapture()](file:///t:/bamboo_nissin/static/js/mainpy.js#359-383) — Transition to Face Capture
+ 
+[Lines 359-382](file:///t:/bamboo_nissin/static/js/mainpy.js#L359-L382):
+ 
+```
+1. autoCyclePhase = "FACE", presenceFps = 5 (Speed up detection)
+2. faceAutoCaptured = false, faceSeenSinceMs = 0
+3. faceCaptureReadyAtMs = MAX_SAFE_INTEGER (Capture not allowed yet)
+4. interruptAndClearAudioQueue() — Stop all current audio
+5. Start presence stream (if not already running)
+6. After 3 seconds (setTimeout 3000ms) → Play audio sndFaceGuide (huongdanchupface.mp3)
+7. After audio finishes → faceCaptureReadyAtMs = Date.now() + 1000
+   (Wait 1 second after audio ends before allowing auto-capture)
+```
+ 
+## 3. Auto-capture Logic in Presence Loop
+ 
+In [startPresenceStream()](file:///t:/bamboo_nissin/static/js/mainpy.js#L1929-L1946):
+ 
+```
+Auto-capture conditions:
+- autoCyclePhase === "FACE"
+- faceAutoCaptured === false
+- Date.now() >= faceCaptureReadyAtMs (Audio finished + 1s)
+- Face is detected (hasFace = true)
+- Face is visible continuously for >= faceAutoCaptureMs (Default 1500ms)
+ 
+If face is visible → Start counting faceSeenSinceMs
+If face is lost → Reset faceSeenSinceMs = 0 and restart
+If count reached → Call handleCaptureFace() → faceAutoCaptured = true, Stop presence
+```
+ 
+## 4. What if the face cannot be captured? Where is `chuaromat.mp3` played?
+ 
+> [!CAUTION]
+> **`chuaromat.mp3` is NOT currently used in the code.** There is no logic to play this file.
+ 
+Currently, if the face cannot be captured (no one in front of the camera):
+ 
+- Presence loop continues indefinitely in the `"FACE"` phase, sending detection frames every ~200ms.
+- `faceSeenSinceMs` is constantly reset to 0 (since no face is seen).
+- `hasPerson` = false → Calls `scheduleWelcomeIdleReturn()`.
+ 
+**There is no timeout or audio alert for "face not clear" in the FACE phase.**
+ 
+## 5. Returning to Idle (Eyes) Screen — 30000ms Timer
+ 
+### Mechanism
+ 
+[scheduleWelcomeIdleReturn()](file:///t:/bamboo_nissin/static/js/mainpy.js#L231-L242):
+ 
+```javascript
+function scheduleWelcomeIdleReturn() {
+    if (state.welcomeEyesVisible || state.welcomeIdleTimer) return; // Already idle or timer set
+    state.welcomeIdleTimer = setTimeout(async () => {
+        if (state.presenceLastHadPerson) return; // Don't reset if person is present
+        if (shouldResetToWelcome()) await resetAll(); // Reset if needed
+        showWelcomeEyes(true);
+    }, state.welcomeIdleTimeoutMs); // 30000ms
+}
+```
+ 
+### When does the 30s countdown start?
+ 
+The timer is **scheduled for the first time** in the presence loop when a frame **DOES NOT see a person** (`hasPerson === false`, [lines 1974-1976](file:///t:/bamboo_nissin/static/js/mainpy.js#L1974-L1976)):
+ 
+```javascript
+} else {
+    scheduleWelcomeIdleReturn();
+}
+```
+ 
+> [!IMPORTANT]
+> - Timer is **only scheduled once** (Guard: `if (state.welcomeIdleTimer) return`)
+> - If **person is seen again** → `clearWelcomeIdleTimer()` — Cancel timer and restart count
+> - Timer starts from the **first frame no person is seen** after the main interface is active
+ 
+### Is everything reset before returning?
+ 
+**YES, if necessary.** `shouldResetToWelcome()` checks:
+ 
+| Condition | Meaning |
+|---|---|
+| `autoCyclePhase !== "IDLE"` | In CARD/FACE/SUBMITTING/REMOVING phase |
+| `faceDataUrl` | Face photo already taken |
+| `serverQRUrl` | Already have QR from server |
+| `lastQRRaw` | QR already scanned |
+| `lastBCardText` | Card OCR already done |
+| `hasCccdData()` | CCCD data present in form |
+| `hasBcardData()` | Business card data present |
+ 
+If **any condition** is true → `resetAll()` is called before showing the idle eyes screen.
+ 
+### Does `resetAll()` clear everything?
+ 
+[Lines 2093-2188](file:///t:/bamboo_nissin/static/js/mainpy.js#L2093-L2188) — **Full Reset**:
+ 
+| Action | Detail |
+|---|---|
+| Stop cameras | `stopCam1()`, `stopCam2()` |
+| Reset state | `presenceSending=false`, `cardAutoSending=false`, `cardAutoDone=false`, `autoCyclePhase="IDLE"`, `faceDataUrl=null`, etc. |
+| Stop OCR | `stopBcardOcrPolling()` |
+| Clear audio timer | `faceGuideAudioTimer` |
+| Clear form | CCCD fields, Business card fields |
+| Clear previews | Face preview, QR image |
+| Unlock cameras | `uiSetScanLockedCam1(false)`, `uiSetScanLockedCam2(false)` |
+| Show idle screen | `showWelcomeEyes(true)` |
+| **After 2s** | Restart Cam1 + Cam2 |
+ 
+> [!NOTE]
+> `interruptAndClearAudioQueue()` is **NOT called** in `resetAll()`. This might be an omission — if audio is playing and reset occurs, audio will continue to play.
+ 
+## 6. Flowchart Summary
+ 
+```mermaid
+graph TD
+    A["👁️ Idle Screen (IDLE)"] -->|"Person detected"| B["Main UI + Greeting"]
+    B -->|"Card detected"| C["CARD phase: Background OCR"]
+    C -->|"No face"| D["FACE phase: startFaceGuidanceAndArmCapture()"]
+    D -->|"3s delay"| E["Play face capture audio guide"]
+    E -->|"Audio done + 1s"| F["Enable auto-capture"]
+    F -->|"See face 1.5s continuously"| G["✅ handleCaptureFace()"]
+    F -->|"Face not found"| H["⏳ Presence loop continues"]
+    H -->|"⚠️ Currently NO chuaromat audio"| H
+    H -->|"30s no person"| I["scheduleWelcomeIdleReturn"]
+    I -->|"shouldResetToWelcome()=true"| J["resetAll()"]
+    J --> A
+    G -->|"tryFinalizeSessionAfterFaceAndOcr"| K["Registration / Thank you"]
+    K -->|"REMOVING or timeout"| J
+```
+ 
+## 7. Questions and Suggestions
+ 
+Regarding the requirement to play `chuaromat.mp3` when a face cannot be captured:
+ 
+1. **Exactly when should it play?** Suggestion: After the guidance audio (`sndFaceGuide`) finishes + N seconds and still no auto-capture (no face seen or face unstable)?
+2. **How many times to play?** Just once or repeat if capture still fails?
+3. **After playing `chuaromat.mp3`, continue waiting for face or move to another action?**

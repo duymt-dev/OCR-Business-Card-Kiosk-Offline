@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SAOMAISOFT</title>
+
+  <link rel="stylesheet" href="/static/css/styles.css" />
+
+  <!-- Offline vendor libs -->
+  <!-- Nimiq QR Scanner: legacy UMD build -->
+  <script src="/static/js/vendor/nimq/qr-scanner.legacy.min.js"></script>
+  <!-- App -->
+  <script defer src="/static/js/mainpy.js"></script>
+</head>
+
+<body>
+  <div id="welcome-eyes-overlay" class="welcome-eyes-overlay mood-neutral" aria-hidden="true">
+    <div class="welcome-face" role="img" aria-label="AIDISAN avatar">
+      <div class="welcome-eye left"><span class="welcome-pupil"></span></div>
+      <div class="welcome-eye right"><span class="welcome-pupil"></span></div>
+
+      <div class="welcome-cheek left"></div>
+      <div class="welcome-cheek right"></div>
+
+      <div class="welcome-mouth">
+        <div class="cup"></div>
+        <div class="line"></div>
+      </div>
+    </div>
+  </div>
+
+  <main class="grid-12">
+    <!-- CỘT TRÁI: 2 khối camera -->
+    <section class="panel col-5 cameras">
+      <!-- Camera 名刺 (card-only) -->
+      <div class="camera-block">
+        <div class="block-header row-one">
+          <h2>名刺</h2>
+          <label for="cam1-select" class="label-inline"></label>
+          <select id="cam1-select"></select>
+        </div>
+
+        <div class="video-wrap">
+          <video id="video1" autoplay playsinline></video>
+          <canvas id="card-bbox-canvas" class="overlay" style="pointer-events:none;"></canvas>
+          <div id="cam1-paused" class="badge-paused" hidden>スキャンはロックされています</div>
+
+          <div class="ocr-status" style="display: none;">
+            OCR 信頼度: <span id="bcard-ocr-score">0%</span>
+          </div>
+
+          <!-- Nút nguồn (ghi chú: JS sẽ gắn handler) -->
+          <button id="cam1-power" class="power-btn" title="Camera 1 電源" aria-label="Camera 1 電源">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M12 3 v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" />
+              <path d="M7.5 6.5 a7 7 0 1 0 9 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                fill="none" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Camera 顔 / QR -->
+      <div class="camera-block">
+        <div class="block-header row-one">
+          <h2>顔 / QR</h2>
+          <label for="cam2-select" class="label-inline"></label>
+          <select id="cam2-select"></select>
+        </div>
+
+        <div class="video-wrap">
+          <video id="video2" autoplay playsinline></video>
+          <div id="scan-overlay" class="overlay"></div>
+          <canvas id="canvas2" class="overlay"></canvas>
+          <div id="cam2-paused" class="badge-paused" hidden>スキャンQRコードはロックされています</div>
+          <div id="presence" class="presence muted small" style="display: none;">誰かを探しています...</div>
+
+          <button id="cam2-power" class="power-btn" title="Camera 2 電源" aria-label="Camera 2 電源">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M12 3 v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" />
+              <path d="M7.5 6.5 a7 7 0 1 0 9 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                fill="none" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CỘT PHẢI: Ảnh + form -->
+    <section class="panel col-7 right-pane">
+      <!-- Ảnh khuôn mặt & QR -->
+      <div class="ketqua two-up">
+        <div><img id="face-preview" /></div>
+        <div><img id="qr-from-server" /></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Khu in (ẩn) -->
+  <div id="print-area">
+    <h2>QR登録</h2>
+    <div id="qr-print"></div>
+  </div>
+</body>
+
+</html>

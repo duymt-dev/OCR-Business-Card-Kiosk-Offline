@@ -1,0 +1,160 @@
+1. Kiểm tra Python hiện tại
+
+Trên Pi:
+
+python3 --version
+which python3
+
+
+Thường Raspberry Pi OS Bookworm là Python 3.11.x ở /usr/bin/python3.
+Cái đó đừng đụng.
+
+2. Cài Python 3.12.4 từ source (song song với system python)
+2.1. Cài các gói build cần thiết
+sudo apt update
+sudo apt install -y \
+  build-essential \
+  libssl-dev zlib1g-dev \
+  libncurses5-dev libncursesw5-dev \
+  libreadline-dev libsqlite3-dev \
+  libgdbm-dev libdb5.3-dev \
+  libbz2-dev libexpat1-dev liblzma-dev \
+  tk-dev libffi-dev uuid-dev \
+  wget
+
+2.2. Tải và build Python 3.12.4
+cd /tmp
+wget https://www.python.org/ftp/python/3.12.4/Python-3.12.4.tgz
+tar xzf Python-3.12.4.tgz
+cd Python-3.12.4
+ 
+
+Cấu hình build (tối ưu + không đè Python hệ thống):
+
+./configure --enable-optimizations --with-ensurepip=install --prefix=/usr/local
+make -j4    # Pi 5 4 lõi => -j4 là hợp lý
+sudo make altinstall
+
+
+altinstall sẽ cài python3.12 / pip3.12 vào /usr/local/bin,
+không đè /usr/bin/python3.
+
+Xong, kiểm tra:
+
+/usr/local/bin/python3.12 --version
+/usr/local/bin/pip3.12 --version
+
+
+Nếu ra Python 3.12.4 là ổn ✅
+
+3. Cho dự án AI dùng Python 3.12.4
+
+Giả sử project của anh ở /home/pi/ai.
+
+3.1. Tạo venv bằng 3.12.4
+cd /home/pi/ai
+/usr/local/bin/python3.12 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+
+
+Rồi cài lib:
+
+pip install flask python-dotenv pillow numpy qrcode rapidocr-onnxruntime ultralytics opencv-python-headless llama-cpp-python
+
+
+(Liệt kê y như project của anh đang dùng, chỉnh cho đúng nhu cầu.)
+
+3.2. Sửa script start_ai_and_browser.sh / run_app.sh cho dùng venv
+
+Trong /home/pi/ai/start_ai_and_browser.sh:
+
+#!/bin/bash
+cd "$(dirname "$0")"
+
+# kích hoạt venv 3.12.4
+if [ -f ".venv/bin/activate" ]; then
+    source .venv/bin/activate
+fi
+
+# chạy app bằng python của venv (là 3.12.4)
+/usr/bin/env python app.py >> app.log 2>&1 &
+# phần dưới giữ nguyên: chờ 127.0.0.1:5000 rồi mở firefox...
+
+
+Vì trong venv, python sẽ trỏ đến python3.12.
+
+4. KHÔNG nên làm gì
+
+Không nên:
+
+sudo apt remove python3
+
+sudo apt install python3=3.12.* (Pi OS Bookworm chưa có gói 3.12 chính thức, mà kể cả có, đụng vào cũng mạo hiểm)
+
+Sửa symlink /usr/bin/python3 sang 3.12.4
+
+Làm vậy dễ:
+
+Hỏng apt, raspi-config, các tool desktop,
+
+Raspberry Pi OS lỗi lung tung.
+
+Cách an toàn luôn là: system python để yên, mình cài thêm 3.12.4 ở /usr/local và dùng qua venv.
+
+5. Nếu anh đã lỡ cài 1 bản Python kỳ cục trước đó
+
+Ví dụ anh từng:
+
+build từ source mà make install đè lên /usr/local/bin/python3, hoặc
+
+cài pyenv linh tinh rồi loạn môi trường,
+
+thì:
+
+Gửi em kết quả:
+
+which python
+which python3
+ls -l /usr/bin/python3 /usr/local/bin/python*
+
+
+em sẽ chỉ anh cách dọn lại cho sạch mà không vỡ OS.
+
+
+# 1) Copy cả thư mục codecuatuyen về /home/sms
+cp -a /mnt/elements/codecuatuyen /home/sms/
+Hoặc nếu muốn đưa thẳng vào thư mục project, ví dụ /home/sms/ai:
+
+bash
+Sao chép mã
+cp -a /mnt/elements/codecuatuyen /home/sms/ai/
+-a = copy cả cây thư mục, giữ nguyên cấu trúc & quyền.
+
+Nếu thư mục nặng và anh muốn xem % tiến độ thì dùng rsync:
+
+bash
+Sao chép mã
+rsync -avh --progress /mnt/elements/codecuatuyen/ /home/sms/codecuatuyen/
+
+
+# 1) Copy cả thư mục codecuatuyen về /home/sms
+cp -a /mnt/elements/codecuatuyen /home/sms/
+Hoặc nếu muốn đưa thẳng vào thư mục project, ví dụ /home/sms/ai:
+
+bash
+Sao chép mã
+cp -a /mnt/elements/codecuatuyen /home/sms/ai/
+-a = copy cả cây thư mục, giữ nguyên cấu trúc & quyền.
+
+Nếu thư mục nặng và anh muốn xem % tiến độ thì dùng rsync:
+
+bash
+Sao chép mã
+rsync -avh --progress /mnt/elements/codecuatuyen/ /home/sms/codecuatuyen/
+
+sudo mount -t ntfs-3g /dev/sda1 /mnt/elements^C
+
+ls /mnt/elements
+
+

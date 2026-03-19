@@ -1,0 +1,69 @@
+1. Tạo script chạy server + mở Firefox
+
+Trong terminal (trên Pi) chạy:
+
+cd /home/pi/ai/code3124/webview_kiosk_nimiq
+
+cat << 'EOF' > start_kiosk.sh
+#!/bin/bash
+cd /home/pi/ai/code3124/webview_kiosk_nimiq
+
+echo "=== Start Python server apppy5.py ==="
+python3 apppy5.py &
+SERVER_PID=$!
+
+echo "Đợi 10 giây rồi mở Firefox..."
+sleep 10
+
+# Mở Firefox trỏ tới app
+firefox http://127.0.0.1:5000 &
+
+echo "Server đang chạy, log sẽ hiện ở đây. Nhấn Ctrl+C để dừng."
+wait $SERVER_PID
+EOF
+
+chmod +x start_kiosk.sh
+
+
+Giải thích nhanh:
+
+Chạy apppy5.py nền, lưu PID.
+
+sleep 10 rồi firefox http://127.0.0.1:5000 &
+
+wait $SERVER_PID để terminal giữ log server, không tắt.
+
+Nếu anh không muốn chạy server, chỉ muốn: mở terminal → chờ 10s → mở Firefox,
+thì xoá đoạn python3 apppy5.py ... và wait $SERVER_PID đi là được.
+
+2. Tạo file .desktop ngoài Desktop
+cat << 'EOF' > /home/pi/Desktop/kiosk-firefox.desktop
+[Desktop Entry]
+Type=Application
+Name=Kiosk OCR
+Comment=Run OCR server and open Firefox
+# Mở terminal (lxterminal) và chạy script
+Exec=lxterminal -e /home/pi/ai/code3124/webview_kiosk_nimiq/start_kiosk.sh
+Icon=utilities-terminal
+Terminal=false
+Categories=Utility;
+EOF
+
+chmod +x /home/pi/Desktop/kiosk-firefox.desktop
+
+
+Exec=lxterminal -e ... → mở lxterminal và chạy script.
+
+Nếu máy anh dùng terminal khác thì đổi lxterminal thành:
+
+x-terminal-emulator -e /home/pi/.../start_kiosk.sh (lệnh chung)
+
+hoặc qterminal -e ... tùy hệ.
+
+3. Cho phép “Launch” icon trên desktop
+
+Trên Raspberry Pi OS mới, thường phải:
+
+Ra Desktop, right-click → Allow Launching (Cho phép chạy) với file kiosk-firefox.desktop.
+
+Sau đó icon sẽ thành app, bấm là chạy.
